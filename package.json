@@ -1,0 +1,24 @@
+{
+  "name": "k8-scaffold",
+  "version": "0.0.1",
+  "description": "The scaffold script to generate Models, Controllers and Admin Controllers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digi3colin/K8-scaffold.git"
+  },
+  "author": "Shiba Komino",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/digi3colin/K8-scaffold/issues"
+  },
+  "homepage": "https://github.com/digi3colin/K8-scaffold#readme",
+  "dependencies": {
+    "better-sqlite3": "^5.4.0",
+    "camelcase": "^5.3.1",
+    "pluralize": "^7.0.0"
+  }
+}
