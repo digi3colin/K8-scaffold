@@ -2,7 +2,7 @@ const fs = require('fs');
 const pluralize = require('pluralize');
 const camelCase = require('camelcase');
 const Database  = require('better-sqlite3');
-const db = new Database('.db/db.sqlite');
+const db = new Database('./db/db.sqlite');
 const tables = db.prepare(`SELECT name FROM sqlite_master WHERE type='table'`).all();
 
 const capitalize = (str)=> {
@@ -48,7 +48,7 @@ tables.forEach(x => {
 // models
 Object.keys(classes).forEach(key => {
   const x = classes[key];
-  const fileName = `./exports/model/${x.modelName}.js`;
+  const fileName = `./exports/classes/model/${x.modelName}.js`;
   const relations = [].concat(x.belongs).concat(x.hasMany);
 
   //parse properties
@@ -106,7 +106,7 @@ module.exports = ${x.modelName};
 //controllers
 Object.keys(classes).forEach(key => {
   const x = classes[key];
-  const fileName = `./exports/controller/Controller${x.modelName}.js`;
+  const fileName = `./exports/classes/controller/Controller${x.modelName}.js`;
 
   //parse header
   let header = '';
@@ -135,7 +135,7 @@ module.exports = Controller${x.modelName};
 // admin controllers
 Object.keys(classes).forEach(key => {
   const x = classes[key];
-  const fileName = `./exports/controller/admin/ControllerAdmin${x.modelName}.js`;
+  const fileName = `./exports/classes/controller/admin/ControllerAdmin${x.modelName}.js`;
 
   //parse header
   let header = '';
