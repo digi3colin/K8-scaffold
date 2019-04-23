@@ -7,8 +7,7 @@ if(fs.existsSync(dbFilePath)){
 fs.writeFileSync(dbFilePath, '', {encoding: 'utf8'});
 
 
-//const Database  = require('better-sqlite3');
-//let sql = fs.readFileSync('../../cms.sql', {encoding: 'utf8'});
-
-//const db = new Database('./db.sqlite');
-//db.prepare(sql).run();
+const Database  = require('better-sqlite3');
+const sql = fs.readFileSync('./db/cms.sql', 'utf8');
+const db = new Database(dbFilePath);
+db.exec(sql);

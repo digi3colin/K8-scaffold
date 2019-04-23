@@ -52,13 +52,17 @@ Object.keys(classes).forEach(key => {
   const relations = [].concat(x.belongs).concat(x.hasMany);
 
   //parse properties
-  let props = `    this.tableName = '${x.tableName}';\n`;
+  let props = ``;
+  let fields = [];
   x.properties.forEach(y => {
     if(y === 'id' || y === 'created_at' || y === 'updated_at'){
       return;
     }
 
     props += `    this.${y} = null;\n`;
+    if(!/_id$/.test(y)){
+      fields.push(`"${y}"`);
+    }
   });
 
   //parse header
@@ -90,12 +94,14 @@ class ${x.modelName} extends ORM{
 
 ${props}
   }
-
-${methods}
 }
 
-${x.modelName}.name = '${x.modelName}';
 ${x.modelName}.tableName = '${x.tableName}';
+${x.modelName}.fields    = [${fields.join(',')}];
+${x.modelName}.belongsTo = [${x.belongs.join(',')}];
+${x.modelName}.hasMany   = [${x.hasMany.join(',')}];
+${x.modelName}.key       = '${x.modelName.toLowerCase()}_id';
+${x.modelName}.lowercase = '${x.modelName.toLowerCase()}';
 module.exports = ${x.modelName};
 `;
 
