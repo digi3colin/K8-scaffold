@@ -64,16 +64,35 @@ tables.forEach(x => {
 Object.keys(classes).forEach(key => {
   const x = classes[key];
   const fileName = `./exports/classes/model/${key}.js`;
+  const relations = [].concat(x.belongs).concat(x.hasMany);
 
   const belongs = x.belongs || [];
   const hasMany = x.hasMany || [];
   const belongsToMany = x.belongsToMany || [];
   const properties = x.properties || [];
 
+
+  belongs.forEach( y => {
+    if(!relations.includes(y)) relations.push(y);
+  });
+
+  hasMany.forEach( y => {
+    if(!relations.includes(y)) relations.push(y);
+  });
+
+  belongsToMany.forEach( y => {
+    if(!relations.includes(y)) relations.push(y);
+  });
+
   //parse header
   let header = '';
   header += `const K8 = require('k8mvc');\n`;
   header += `const ORM = K8.require('ORM');\n`;
+
+  relations.forEach(x => {
+    if(x === undefined)return;
+    header += `const ${x} = K8.require('model/${x}');\n`;
+  });
 
 //combine the content
   const text =
@@ -82,24 +101,21 @@ class ${key} extends ORM{
   constructor() {
     super();
 
-${belongs.map(y => `    this.${y.toLowerCase()}_id = null;`).join('\n')}
-
 ${properties.map(y => `    this.${y} = null;`).join('\n')}
-
   }
 }
 
 ${key}.tableName     = '${x.tableName}';
 ${key}.fields        = [${properties.map(x => `'${x}'`).join(', ')}];
-${key}.belongsTo     = [${belongs.map(x => `'${x}'`).join(', ')}];
-${key}.hasMany       = [${hasMany.map(x => `'${x}'`).join(', ')}];
-${key}.belongsToMany = [${belongsToMany.map(x => `'${x}'`).join(', ')}];
+${key}.belongsTo     = [${belongs.join(', ')}];
+${key}.hasMany       = [${hasMany.join(', ')}];
+${key}.belongsToMany = [${belongsToMany.join(', ')}];
 ${key}.key           = '${key.toLowerCase()}_id';
 ${key}.lowercase     = '${key.toLowerCase()}';
 
 module.exports = ${key};
 `;
-  if(x.tableName === undefined)return;
+if(x.tableName === undefined)return;
   //write;
   fs.writeFile(fileName, text, err => {if(err)console.log(err);});
 });
@@ -128,7 +144,6 @@ class Controller${key} extends ControllerWithView{
 
 module.exports = Controller${key};
 `;
-
   if(x.tableName === undefined)return;
   //write;
   fs.writeFile(fileName, text, err => {if(err)console.log(err);});
@@ -158,7 +173,6 @@ class ControllerAdmin${key} extends ControllerAdmin{
 
 module.exports = ControllerAdmin${key};
 `;
-
   if(x.tableName === undefined)return;
   //write;
   fs.writeFile(fileName, text, err => {if(err)console.log(err);});
