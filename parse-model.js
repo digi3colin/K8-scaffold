@@ -21,13 +21,26 @@ ${model.fields.map(x => `    this.${x} = null;`).join('\n')}
   }
 }
 
+${model.className}.lowercase = '${snakeCase(model.className)}';
 ${model.className}.tableName = '${model.tableName}';
 ${model.className}.key       = '${model.key}';
-${model.className}.fields    = [${model.fields.map(x => `'${x}'`).join(', ')}];
-${model.className}.belongsTo = [${model.belongsTo.map(x => (typeof x === 'object') ? x : ({model:x, fk:`${snakeCase(x)}_id`})).map( x => JSON.stringify(x)).join(', ')}];
-${model.className}.hasMany   = [${model.hasMany.map(  x => (typeof x === 'object') ? x : ({model:x, fk:`${snakeCase(x)}_id`})).map( x => JSON.stringify(x)).join(', ')}];
-${model.className}.belongsToMany = [${model.belongsToMany.map(x => `'${x}'`).join(', ')}];
-${model.className}.lowercase = '${snakeCase(model.className)}';
+
+${model.className}.fieldType = {
+  ${Object.keys(model.fieldType).map(x => `${x} : [${model.fieldType[x].map(y => `'${y}'`).join(', ')}]`).join(',\n  ')}
+};
+
+${model.className}.belongsTo = [
+  ${model.belongsTo.map(x => (typeof x === 'object') ? x : ({model:x, fk:`${snakeCase(x)}_id`})).map( x => `{fk: '${x.fk}', model: '${x.model}'}`).join(',\n  ')}
+];
+
+${model.className}.hasMany   = [
+  ${model.hasMany.map(  x => (typeof x === 'object') ? x : ({model:x, fk:`${snakeCase(model.className)}_id`})).map( x => `{fk: '${x.fk}', model: '${x.model}'}`).join(',\n  ')}
+];
+
+${model.className}.belongsToMany = [
+  ${model.belongsToMany.map(x => `'${x}'`).join(',\n  ')}
+];
+
 
 module.exports = ${model.className};
 `;
@@ -35,10 +48,10 @@ module.exports = ${model.className};
 
 function parseController(model){
   return `const K8 = require('k8mvc');
-const ControllerWithView = K8.require('ControllerWithView');
+const ControllerORMView = K8.require('ControllerORMView');
 const ${model.className} = K8.require('model/${model.className}');
 
-class Controller${model.className} extends ControllerWithView{
+class Controller${model.className} extends ControllerORMView{
   constructor(request, response) {
     super(request, response);
     this.model = ${model.className};
@@ -120,6 +133,7 @@ function getDef(model){
     tableName : conversion(model, CONV_TABLE),
     key       : conversion(model, CONV_KEY),
     fields    :[],
+    fieldType :{},
 
     foreignKeys   : [],
     belongsTo     : [],
@@ -129,14 +143,20 @@ function getDef(model){
 
   //parse extends
   (rawDef.extends || []).forEach( x => {
-    Object.keys(x.fields).forEach(y => def.fields.push(y));
+    Object.keys(x.fields).forEach(y => {
+      def.fields.push(y);
+      def.fieldType[y] = x.fields[y];
+    });
   });
 
   //parse fields
-  Object.keys(rawDef.fields || {}).forEach( y => def.fields.push(y));
+  Object.keys(rawDef.fields || {}).forEach( y => {
+    def.fields.push(y);
+    def.fieldType[y] = rawDef.fields[y];
+  });
 
   //parse fk
-  (rawDef.belongsTo || []).forEach( x => {
+  (rawDef.belongs_to || []).forEach( x => {
     const res = parseFK(x);
 
     def.belongsTo.push(
