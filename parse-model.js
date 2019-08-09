@@ -1,3 +1,4 @@
+const VERSION = '0.1.13';
 const fs = require('fs');
 
 const pluralize = require('pluralize');
@@ -10,8 +11,8 @@ function parseClass(model){
 const ORM = K8.require('ORM');
 
 class ${model.className} extends ORM{
-  constructor() {
-    super();
+  constructor(id) {
+    super(id);
 
     //foreignKeys
 ${model.foreignKeys.map(x => `    this.${x} = null;`).join('\n')}
@@ -21,7 +22,7 @@ ${model.fields.map(x => `    this.${x} = null;`).join('\n')}
   }
 }
 
-${model.className}.lowercase = '${snakeCase(model.className)}';
+${model.className}.jointTablePrefix = '${pluralize.singular(model.tableName)}';
 ${model.className}.tableName = '${model.tableName}';
 ${model.className}.key       = '${model.key}';
 
