@@ -1,4 +1,4 @@
-const VERSION = '0.1.13';
+const VERSION = '0.1.14';
 const fs = require('fs');
 
 const pluralize = require('pluralize');
@@ -50,7 +50,7 @@ module.exports = ${model.className};
 function parseController(model){
   return `const K8 = require('k8mvc');
 const ControllerORMView = K8.require('ControllerORMView');
-const ${model.className} = K8.require('model/${model.className}');
+const ${model.className} = K8.require('models/${model.className}');
 
 class Controller${model.className} extends ControllerORMView{
   constructor(request, response) {
@@ -66,7 +66,7 @@ module.exports = Controller${model.className};
 function parseControllerAdmin(model){
   return `const K8 = require('k8mvc');
 const ControllerAdmin = K8.require('ControllerAdmin');
-const ${model.className} = K8.require('model/${model.className}');
+const ${model.className} = K8.require('models/${model.className}');
 
 class ControllerAdmin${model.className} extends ControllerAdmin{
   constructor(request, response) {
@@ -219,9 +219,9 @@ module.exports = {
 
     if (!fs.existsSync(`${path}`)){
       fs.mkdirSync(`${path}`);
-      fs.mkdirSync(`${path}/model`);
-      fs.mkdirSync(`${path}/controller`);
-      fs.mkdirSync(`${path}/controller/admin`);
+      fs.mkdirSync(`${path}/models`);
+      fs.mkdirSync(`${path}/controllers`);
+      fs.mkdirSync(`${path}/controllers/admin`);
     }
 
     addHasMany(schema).forEach(x => {
@@ -229,9 +229,9 @@ module.exports = {
       const codeController = parseController(x);
       const codeControllerAdmin = parseControllerAdmin(x);
 
-      fs.writeFile(`${path}/model/${x.className}.js`, codeClass, err => {if(err)console.log(err);});
-      fs.writeFile(`${path}/controller/Controller${x.className}.js`, codeController, err => {if(err)console.log(err);});
-      fs.writeFile(`${path}/controller/admin/ControllerAdmin${x.className}.js`, codeControllerAdmin, err => {if(err)console.log(err);});
+      fs.writeFile(`${path}/models/${x.className}.js`, codeClass, err => {if(err)console.log(err);});
+      fs.writeFile(`${path}/controllers/Controller${x.className}.js`, codeController, err => {if(err)console.log(err);});
+      fs.writeFile(`${path}/controllers/admin/ControllerAdmin${x.className}.js`, codeControllerAdmin, err => {if(err)console.log(err);});
     })
   }
 };

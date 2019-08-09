@@ -1,165 +1,19 @@
-const fs = require('fs');
-const pluralize = require('pluralize');
-const camelCase = require('camelcase');
-const capitalize = require('capitalize');
+const dbFilePath = './db/db.sqlite';
+const {schema, samples} = require('./db/schema');
 const Database  = require('better-sqlite3');
-const db = new Database('./db/db.sqlite');
-const tables = db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table' AND name <> 'sqlite_sequence'`).all();
+const codeGen = require('./parse-model');
+const {parse, insert} = require('./parse-schema');
 
-const classes = [];
-tables.forEach(x => {
-  const tableName = x.name;
+const fs = require('fs');
 
-  const columns = db.prepare(`PRAGMA table_info(${tableName})`)
-    .all()
-    .map(y => y.name);
+//delete db
+if(fs.existsSync(dbFilePath))fs.unlinkSync(dbFilePath);
+fs.writeFileSync(dbFilePath, '', {encoding: 'utf8'});
 
-  const isORM = columns.includes('created_at');
+const db = new Database(dbFilePath);
+db.exec(parse(schema));
 
-  if(isORM){
-    const className = capitalize(pluralize.singular(tableName));
-    const properties = [];
-    const belongs = [];
+const inserts = insert(samples);
+db.exec(inserts);
 
-    columns.forEach( column => {
-      if(column === 'id' || column === 'created_at' || column === 'updated_at'){
-        return;
-      }
-
-      if(/_id$/.test(column)){
-        const a = className;
-        const b = capitalize(column.replace('_id', ''));
-
-        belongs.push(b);
-
-        classes[b] = classes[b] || {};
-        classes[b].hasMany = classes[b].hasMany || [];
-        classes[b].hasMany.push(a);
-      }else{
-        properties.push(column);
-      }
-    });
-
-    classes[className] = Object.assign( (classes[className] || {}) , {
-      'tableName': tableName,
-      'properties': properties,
-      'belongs' : belongs,
-    });
-
-  }else{
-    let a = x.name.split('_')[0];
-    const b = capitalize(pluralize.singular(x.name.replace(a+'_', '')));
-    a = capitalize(a);
-
-    classes[a] = classes[a] || {};
-    classes[a].belongsToMany = classes[a].belongsToMany || [];
-    classes[a].belongsToMany.push(b);
-
-  }
-
-});
-
-//code gen
-// models
-Object.keys(classes).forEach(key => {
-  const x = classes[key];
-  const fileName = `./exports/classes/model/${key}.js`;
-
-  const belongs = x.belongs || [];
-  const hasMany = x.hasMany || [];
-  const belongsToMany = x.belongsToMany || [];
-  const properties = x.properties || [];
-
-  //parse header
-  let header = '';
-  header += `const K8 = require('k8mvc');\n`;
-  header += `const ORM = K8.require('ORM');\n`;
-
-//combine the content
-  const text =
-    `${header}
-class ${key} extends ORM{
-  constructor() {
-    super();
-
-${belongs.map(y => `    this.${y.toLowerCase()}_id = null;`).join('\n')}
-
-${properties.map(y => `    this.${y} = null;`).join('\n')}
-
-  }
-}
-
-${key}.tableName     = '${x.tableName}';
-${key}.fields        = [${properties.map(x => `'${x}'`).join(', ')}];
-${key}.belongsTo     = [${belongs.map(x => `'${x}'`).join(', ')}];
-${key}.hasMany       = [${hasMany.map(x => `'${x}'`).join(', ')}];
-${key}.belongsToMany = [${belongsToMany.map(x => `'${x}'`).join(', ')}];
-${key}.key           = '${key.toLowerCase()}_id';
-${key}.lowercase     = '${key.toLowerCase()}';
-
-module.exports = ${key};
-`;
-  if(x.tableName === undefined)return;
-  //write;
-  fs.writeFile(fileName, text, err => {if(err)console.log(err);});
-});
-
-//controllers
-Object.keys(classes).forEach(key => {
-  const x = classes[key];
-  const fileName = `./exports/classes/controller/Controller${key}.js`;
-
-  //parse header
-  let header = '';
-  header += `const K8 = require('k8mvc');\n`;
-  header += `const ControllerWithView = K8.require('ControllerWithView');\n`;
-  header += `const ${key} = K8.require('model/${key}');`;
-
-//combine the content
-  const text =
-    `${header}
-
-class Controller${key} extends ControllerWithView{
-  constructor(request, response) {
-    super(request, response);
-    this.model = ${key};
-  }
-}
-
-module.exports = Controller${key};
-`;
-
-  if(x.tableName === undefined)return;
-  //write;
-  fs.writeFile(fileName, text, err => {if(err)console.log(err);});
-});
-
-// admin controllers
-Object.keys(classes).forEach(key => {
-  const x = classes[key];
-  const fileName = `./exports/classes/controller/admin/ControllerAdmin${key}.js`;
-
-  //parse header
-  let header = '';
-  header += `const K8 = require('k8mvc');\n`;
-  header += `const ControllerAdmin = K8.require('ControllerAdmin');\n`;
-  header += `const ${key} = K8.require('model/${key}');`;
-
-//combine the content
-  const text =
-    `${header}
-
-class ControllerAdmin${key} extends ControllerAdmin{
-  constructor(request, response) {
-    super(request, response);
-    this.model = ${key};
-  }
-}
-
-module.exports = ControllerAdmin${key};
-`;
-
-  if(x.tableName === undefined)return;
-  //write;
-  fs.writeFile(fileName, text, err => {if(err)console.log(err);});
-});
+codeGen.exec(schema);
