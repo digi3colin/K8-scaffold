@@ -13,6 +13,7 @@ const ORM = K8.require('ORM');
 class ${model.className} extends ORM{
   constructor(id) {
     super(id);
+    if(id)return;
 
     //foreignKeys
 ${model.foreignKeys.map(x => `    this.${x} = null;`).join('\n')}
