@@ -6,6 +6,12 @@ const camelCase = require('camelcase');
 const capitalize = require('capitalize');
 const snakeCase = require('snake-case');
 
+function convertDefaultValue(value){
+  if(!value)return 'null';
+  if(isNaN(parseFloat(value)))return `'${value}'`;
+  return value;
+}
+
 function parseClass(model){
   return `const K8 = require('k8mvc');
 const ORM = K8.require('ORM');
@@ -19,7 +25,7 @@ class ${model.className} extends ORM{
 ${model.foreignKeys.map(x => `    this.${x} = null;`).join('\n')}
 
     //fields
-${model.fields.map(x => `    this.${x} = null;`).join('\n')}
+${model.fields.map(x => `    this.${x} = ${model.defaultValues[x]};`).join('\n')}
   }
 }
 
@@ -135,6 +141,7 @@ function getDef(model){
     tableName : conversion(model, CONV_TABLE),
     key       : conversion(model, CONV_KEY),
     fields    :[],
+    defaultValues : {},
     fieldType :{},
 
     foreignKeys   : [],
@@ -148,6 +155,8 @@ function getDef(model){
     Object.keys(x.fields).forEach(y => {
       def.fields.push(y);
       def.fieldType[y] = x.fields[y];
+
+      def.defaultValues[y] = convertDefaultValue(x.fields[y][2]);
     });
   });
 
@@ -155,6 +164,8 @@ function getDef(model){
   Object.keys(rawDef.fields || {}).forEach( y => {
     def.fields.push(y);
     def.fieldType[y] = rawDef.fields[y];
+
+    def.defaultValues[y] = convertDefaultValue(rawDef.fields[y][2]);
   });
 
   //parse fk
