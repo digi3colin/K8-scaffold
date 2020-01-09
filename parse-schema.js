@@ -14,7 +14,7 @@ const validateSchema = (data) => {
 };
 
 //console.log(schema);
-const s = (v, prefix = '') => (v ? ` ${prefix}${v}` : '');
+const s = (v, prefix = '') => (v ? (v === '' ? v : ` ${prefix}${v}`) : '');
 
 function parse(model){
   const key = Object.keys(model).join('');
@@ -32,15 +32,15 @@ function parse(model){
 
   //extends
   def.extends.forEach(
-    y => {
-      Object
-        .keys(y.fields)
-        .forEach(z => lines.push(`${z} ${y.fields[z][0]}${s(y.fields[z][1])}${s(y.fields[z][2], 'DEFAULT ')}`))
-    }
+      y => {
+        Object
+            .keys(y.fields)
+            .forEach(z => lines.push(`${z} ${y.fields[z][0]}${s(y.fields[z][1])}${s(y.fields[z][2], 'DEFAULT ')}${s(y.fields[z][3])}`))
+      }
   );
 
   //fields
-  Object.keys(def.fields).forEach(z => lines.push(`${z} ${def.fields[z][0]}${s(def.fields[z][1])}${s(def.fields[z][2], 'DEFAULT ')}`));
+  Object.keys(def.fields).forEach(z => lines.push(`${z} ${def.fields[z][0]}${s(def.fields[z][1])}${s(def.fields[z][2], 'DEFAULT ')}${s(def.fields[z][3])}`));
 
   //belongs
   def.belongs_to.forEach(y => {
@@ -64,18 +64,18 @@ function parse(model){
 
   //belongs many
   const belongs_many = def.has_and_belongs_to_many.map(
-    y => {
-      const a = pluralize.singular(table);
-      const b = pluralize.singular(snakeCase(Object.keys(y).join('')));
-      const tbl =  a + '_' + pluralize.plural(b);
+      y => {
+        const a = pluralize.singular(table);
+        const b = pluralize.singular(snakeCase(Object.keys(y).join('')));
+        const tbl =  a + '_' + pluralize.plural(b);
 
-      return `CREATE TABLE ${tbl}(
+        return `CREATE TABLE ${tbl}(
 ${a}_id INTEGER NOT NULL,
 ${b}_id INTEGER NOT NULL,
 FOREIGN KEY (${a}_id) REFERENCES ${pluralize.plural(a)} (id) ON DELETE CASCADE ,
 FOREIGN KEY (${b}_id) REFERENCES ${pluralize.plural(b)} (id) ON DELETE CASCADE
 );`;
-  }).join('\n');
+      }).join('\n');
 
   return `CREATE TABLE ${table}(
 ${lines.concat(onDeletes).join(' ,\n')}
@@ -94,11 +94,11 @@ function parseFK(model){
   let fk = '';
 
   if(
-    keys.includes('extends') ||
-    keys.includes('fields') ||
-    keys.includes('belongs_to') ||
-    keys.includes('associate_to') ||
-    keys.includes('has_and_belongs_to_many')
+      keys.includes('extends') ||
+      keys.includes('fields') ||
+      keys.includes('belongs_to') ||
+      keys.includes('associate_to') ||
+      keys.includes('has_and_belongs_to_many')
   ){
     table = snakeCase(Object.keys(model).join(''));
     fk = pluralize.singular(table) + '_id';
@@ -134,9 +134,9 @@ const insert = function(data){
 
   data.forEach(x => {
     const table = snakeCase(Object.keys(x[0]).join(''));
-    const keys = Object.keys(x[1][0])
+    const keys = Object.keys(x[1][0]);
     lines.push(
-      `INSERT INTO ${table} (${keys.join(', ')}) VALUES ${ x[1].map( y => `(${Object.keys(y).map(z => `'${String(y[z]).replace(/'/g, "''")}'`).join(', ')})`).join(',\n')};`
+        `INSERT INTO ${table} (${keys.join(', ')}) VALUES ${ x[1].map( y => `(${Object.keys(y).map(z => `'${String(y[z]).replace(/'/g, "''")}'`).join(', ')})`).join(',\n')};`
     );
   });
 

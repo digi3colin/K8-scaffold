@@ -17,8 +17,8 @@ function parseClass(model){
 const ORM = K8.require('ORM');
 
 class ${model.className} extends ORM{
-  constructor(id) {
-    super(id);
+  constructor(id, db) {
+    super(id, db);
     if(id)return;
 
     //foreignKeys
