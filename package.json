@@ -1,6 +1,6 @@
 {
   "name": "k8-scaffold",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "The scaffold script to generate Models, Controllers and Admin Controllers",
   "main": "index.js",
   "scripts": {

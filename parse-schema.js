@@ -72,6 +72,7 @@ function parse(model){
         return `CREATE TABLE ${tbl}(
 ${a}_id INTEGER NOT NULL,
 ${b}_id INTEGER NOT NULL,
+weight REAL, 
 FOREIGN KEY (${a}_id) REFERENCES ${pluralize.plural(a)} (id) ON DELETE CASCADE ,
 FOREIGN KEY (${b}_id) REFERENCES ${pluralize.plural(b)} (id) ON DELETE CASCADE
 );`;
