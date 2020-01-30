@@ -1,9 +1,7 @@
-const VERSION = '0.1.14';
+const VERSION = '0.1.20';
 const fs = require('fs');
 
 const pluralize = require('pluralize');
-const camelCase = require('camelcase');
-const capitalize = require('capitalize');
 const snakeCase = require('snake-case');
 
 function convertDefaultValue(value){
