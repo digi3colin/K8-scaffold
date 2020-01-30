@@ -224,9 +224,8 @@ const addHasMany = schema => {
 };
 
 module.exports = {
-  exec : schema => {
-    const path = __dirname + '/exports/classes';
-    var rimraf = require("rimraf");
+  exec : (schema, path) => {
+    const rimraf = require("rimraf");
     rimraf.sync(path);
 
     if (!fs.existsSync(`${path}`)){

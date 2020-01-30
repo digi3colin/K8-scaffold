@@ -1,6 +1,4 @@
 const pluralize = require('pluralize');
-const camelCase = require('camelcase');
-const capitalize = require('capitalize');
 const snakeCase = require('snake-case');
 
 const validateSchema = (data) => {
@@ -78,6 +76,16 @@ FOREIGN KEY (${b}_id) REFERENCES ${pluralize.plural(b)} (id) ON DELETE CASCADE
 );`;
       }).join('\n');
 
+  //indexes
+  const indexes = (def.indexes || []).map(y => {
+    return 'CREATE INDEX idx_${table}_${y} ON ${table} (${y});'
+  }).join('\n');
+
+  //indexes
+  const uniqueIndexes = (def.unique_indexes || []).map(y => {
+    return 'CREATE UNIQUE INDEX idx_${table}_${y} ON ${table} (${y});'
+  }).join('\n');
+
   return `CREATE TABLE ${table}(
 ${lines.concat(onDeletes).join(' ,\n')}
 );
@@ -86,7 +94,12 @@ CREATE TRIGGER ${table}_updated_at AFTER UPDATE ON ${table} WHEN old.updated_at 
     UPDATE ${table} SET updated_at = CURRENT_TIMESTAMP WHERE id = old.id;
 END;
 
-${belongs_many}`;
+${belongs_many}
+
+${indexes}
+
+${uniqueIndexes}
+`;
 }
 
 function parseFK(model){

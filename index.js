@@ -1,23 +1,54 @@
-const dbFilePath = './db/db.sqlite';
-const sqlFilePath= './db/db.sql';
-const {schema, samples} = require('./db/schema');
-const Database  = require('better-sqlite3');
-const codeGen = require('./parse-model');
-const {parse, insert} = require('./parse-schema');
-
 const fs = require('fs');
+const Database  = require('better-sqlite3');
 
-//delete db
-if(fs.existsSync(dbFilePath))fs.unlinkSync(dbFilePath);
-fs.writeFileSync(dbFilePath, '', {encoding: 'utf8'});
+const {parse, insert} = require('./parse-schema');
+const codeGen = require('./parse-model').exec;
 
-const sql = parse(schema);
-fs.writeFileSync(sqlFilePath, sql, {encoding: 'utf8'});
+module.exports = {
+  scaffold : (dbFilePath, sqlFilePath, classPath, schemaModule) => {
+    const schema = schemaModule.schema  || [];
+    const samples= schemaModule.samples || [];
+    const pragma = schemaModule.pragma  || [];
 
-const db = new Database(dbFilePath);
-db.exec(sql);
+    //delete db
+    if(fs.existsSync(dbFilePath))fs.unlinkSync(dbFilePath);
+    fs.writeFileSync(dbFilePath, '', {encoding: 'utf8'});
 
-const inserts = insert(samples);
-db.exec(inserts);
+    const sql = parse(schema);
+    fs.writeFileSync(sqlFilePath, sql, {encoding: 'utf8'});
 
-codeGen.exec(schema);
+    const db = new Database(dbFilePath);
+    db.exec(sql);
+
+    const inserts = insert(samples);
+    db.exec(inserts);
+
+    pragma.forEach(x => db.exec(`PRAGMA ${x}`));
+
+    codeGen(schema, classPath);
+  },
+  SQLITE       : {
+    UNIQUE     : 'NOT NULL UNIQUE',
+    NOT_NULL   : 'NOT NULL',
+    NULL       : 'NULL',
+    INT        : 'INTEGER',
+    NUM        : 'REAL',
+    TEXT       : 'TEXT',
+    BLOB       : 'BLOB',
+    BOOL       : 'BOOLEAN',
+    TRUE       : 'TRUE',
+    FALSE      : 'FALSE',
+    DATE       : 'DATETIME',
+  },
+  codeGen      : require('./parse-model').exec,
+  parseSchema  : (sqlFilePath, schema) => {
+    const sql = parse(schema);
+    fs.writeFileSync(sqlFilePath, sql, {encoding: 'utf8'});
+  },
+  parseSample  : (sqlFilePath, sample) =>{
+    const sql = insert(sample);
+    fs.writeFilesync(outputPath, sql, {encoding: 'utf8'});
+  },
+  insertSample : insert,
+  uid: () => (Math.floor(Date.now()-1563741060000)/1000)*100000 + Math.floor(Math.random()*100000),
+};
