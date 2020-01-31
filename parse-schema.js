@@ -78,12 +78,12 @@ FOREIGN KEY (${b}_id) REFERENCES ${pluralize.plural(b)} (id) ON DELETE CASCADE
 
   //indexes
   const indexes = (def.indexes || []).map(y => {
-    return 'CREATE INDEX idx_${table}_${y} ON ${table} (${y});'
+    return `CREATE INDEX idx_${table}_${y} ON ${table} (${y});`
   }).join('\n');
 
   //indexes
   const uniqueIndexes = (def.unique_indexes || []).map(y => {
-    return 'CREATE UNIQUE INDEX idx_${table}_${y} ON ${table} (${y});'
+    return `CREATE UNIQUE INDEX idx_${table}_${y} ON ${table} (${y});`
   }).join('\n');
 
   return `CREATE TABLE ${table}(
@@ -94,12 +94,7 @@ CREATE TRIGGER ${table}_updated_at AFTER UPDATE ON ${table} WHEN old.updated_at 
     UPDATE ${table} SET updated_at = CURRENT_TIMESTAMP WHERE id = old.id;
 END;
 
-${belongs_many}
-
-${indexes}
-
-${uniqueIndexes}
-`;
+${belongs_many}${indexes}${uniqueIndexes}`;
 }
 
 function parseFK(model){
