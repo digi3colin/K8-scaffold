@@ -31,9 +31,9 @@ function parse(model){
   //extends
   def.extends.forEach(
       y => {
-        Object
-            .keys(y.fields)
-            .forEach(z => lines.push(`${z} ${y.fields[z][0]}${s(y.fields[z][1])}${s(y.fields[z][2], 'DEFAULT ')}${s(y.fields[z][3])}`))
+        def.fields = Object.assign({}, y.fields, def.fields);
+        def.unique_indexes = [].concat(y.unique_indexes || [], def.unique_indexes || []);
+        def.indexes = [].concat(y.indexes || [], def.indexes || []);
       }
   );
 
@@ -94,7 +94,11 @@ CREATE TRIGGER ${table}_updated_at AFTER UPDATE ON ${table} WHEN old.updated_at 
     UPDATE ${table} SET updated_at = CURRENT_TIMESTAMP WHERE id = old.id;
 END;
 
-${belongs_many}${indexes}${uniqueIndexes}`;
+${belongs_many}
+${indexes}
+${uniqueIndexes}
+
+`;
 }
 
 function parseFK(model){

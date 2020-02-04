@@ -27,18 +27,19 @@ module.exports = {
 
     codeGen(schema, classPath);
   },
-  SQLITE       : {
-    UNIQUE     : 'NOT NULL UNIQUE',
-    NOT_NULL   : 'NOT NULL',
-    NULL       : 'NULL',
-    INT        : 'INTEGER',
-    NUM        : 'REAL',
-    TEXT       : 'TEXT',
-    BLOB       : 'BLOB',
-    BOOL       : 'BOOLEAN',
-    TRUE       : 'TRUE',
-    FALSE      : 'FALSE',
-    DATE       : 'DATETIME',
+  SQLITE            : {
+    UNIQUE          : 'UNIQUE',
+    NOT_NULL_UNIQUE : 'NOT NULL UNIQUE',
+    NOT_NULL        : 'NOT NULL',
+    NULL            : 'NULL',
+    INT             : 'INTEGER',
+    NUM             : 'REAL',
+    TEXT            : 'TEXT',
+    BLOB            : 'BLOB',
+    BOOL            : 'BOOLEAN',
+    TRUE            : 'TRUE',
+    FALSE           : 'FALSE',
+    DATE            : 'DATETIME',
   },
   codeGen      : require('./parse-model').exec,
   parseSchema  : (sqlFilePath, schema) => {
