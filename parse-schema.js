@@ -24,7 +24,7 @@ function parse(model){
   const onDeletes = [];
 
 //  lines.push(`rid INTEGER UNIQUE PRIMARY KEY AUTOINCREMENT NOT NULL`);
-  lines.push(`id INTEGER UNIQUE DEFAULT ( ( strftime('%s','now') - 1563741060 ) * 100000 + ABS(RANDOM()%100000) ) NOT NULL`);
+  lines.push(`id INTEGER UNIQUE DEFAULT ((( strftime('%s','now') - 1563741060 ) * 100000) + (RANDOM() & 65535)) NOT NULL`);
   lines.push(`created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL`);
   lines.push(`updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL`);
 

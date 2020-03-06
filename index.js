@@ -51,5 +51,5 @@ module.exports = {
     fs.writeFilesync(outputPath, sql, {encoding: 'utf8'});
   },
   insertSample : insert,
-  uid: () => (Math.floor(Date.now()-1563741060000)/1000)*100000 + Math.floor(Math.random()*100000),
+  uid: () => ( ( (Date.now() - 1563741060000) / 1000 ) | 0 ) * 100000 + ((Math.random()*100000) & 65535),
 };
