@@ -1,6 +1,6 @@
 {
   "name": "k8-scaffold",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "The scaffold script to generate Models, Controllers and Admin Controllers",
   "main": "index.js",
   "scripts": {
@@ -18,8 +18,8 @@
   "homepage": "https://github.com/digi3colin/K8-scaffold#readme",
   "dependencies": {
     "better-sqlite3": "^5.4.3",
-    "pluralize": "^7.0.0",
-    "rimraf": "^2.7.1",
-    "snake-case": "^2.1.0"
+    "pluralize": "^8.0.0",
+    "rimraf": "^3.0.2",
+    "snake-case": "^3.0.3"
   }
 }

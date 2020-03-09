@@ -11,7 +11,7 @@ function convertDefaultValue(value){
 }
 
 function parseClass(model){
-  return `const K8 = require('k8mvc');
+  return `const {K8} = require('k8mvc');
 const ORM = K8.require('ORM');
 
 class ${model.className} extends ORM{
@@ -53,7 +53,7 @@ module.exports = ${model.className};
 }
 
 function parseController(model){
-  return `const K8 = require('k8mvc');
+  return `const {K8} = require('k8mvc');
 const ControllerORMView = K8.require('ControllerORMView');
 const ${model.className} = K8.require('models/${model.className}');
 
@@ -69,7 +69,7 @@ module.exports = Controller${model.className};
 }
 
 function parseControllerAdmin(model){
-  return `const K8 = require('k8mvc');
+  return `const {K8} = require('k8mvc');
 const ControllerAdmin = K8.require('ControllerAdmin');
 const ${model.className} = K8.require('models/${model.className}');
 
