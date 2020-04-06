@@ -1,5 +1,5 @@
 const pluralize = require('pluralize');
-const snakeCase = require('snake-case');
+const {snakeCase} = require('snake-case');
 
 const validateSchema = (data) => {
   if(!Array.isArray(data))return false;

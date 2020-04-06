@@ -40,6 +40,7 @@ module.exports = {
     TRUE            : 'TRUE',
     FALSE           : 'FALSE',
     DATE            : 'DATETIME',
+    AUTOINCREMENT   : 'PRIMARY KEY AUTOINCREMENT NOT NULL',
   },
   codeGen      : require('./parse-model').exec,
   parseSchema  : (sqlFilePath, schema) => {
